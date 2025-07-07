@@ -38,6 +38,24 @@
     @apply bg-background text-foreground font-['Poppins',sans-serif];
     background: linear-gradient(135deg, hsl(210, 15%, 8%) 0%, hsl(210, 15%, 12%) 100%);
     min-height: 100vh;
+    /* Mobile optimizations */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  /* Safe area support for mobile */
+  .safe-area-padding {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 }
 
@@ -85,4 +103,16 @@
       box-shadow: 0 0 30px rgba(147, 51, 234, 0.6);
     }
   }
+
+  /* Mobile-specific styles */
+  .mobile-tap {
+    -webkit-tap-highlight-color: rgba(147, 51, 234, 0.2);
+    cursor: pointer;
+  }
+
+  /* Prevent zoom on input focus (iOS) */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
 }
+
