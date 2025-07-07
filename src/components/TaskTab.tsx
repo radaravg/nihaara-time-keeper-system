@@ -109,10 +109,15 @@ export const TaskTab = ({ employeeId }: TaskTabProps) => {
         </div>
       </div>
 
-      {/* Today's Tasks */}
+      {/* Today's Tasks - Prioritized */}
       {todayTasks.length > 0 && (
         <div className="glass-card p-4">
-          <h3 className="font-semibold text-primary mb-4">Today's Tasks</h3>
+          <h3 className="font-semibold text-primary mb-4 flex items-center space-x-2">
+            <span>Today's Tasks</span>
+            <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">
+              {todayTasks.filter(task => !task.completed).length} pending
+            </span>
+          </h3>
           <div className="space-y-3">
             {todayTasks.map(task => (
               <TaskItem
@@ -159,6 +164,12 @@ export const TaskTab = ({ employeeId }: TaskTabProps) => {
       {userTasks.length === 0 && (
         <div className="text-center py-12">
           <p className="text-muted-foreground">No tasks yet. Add your first task above!</p>
+        </div>
+      )}
+
+      {todayTasks.length === 0 && otherTasks.length > 0 && (
+        <div className="text-center py-8 glass-card">
+          <p className="text-muted-foreground">No tasks for today. Add one above to get started!</p>
         </div>
       )}
     </div>
