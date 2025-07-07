@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { SwipeToMark } from './SwipeToMark';
 import { Clock, MapPin } from 'lucide-react';
@@ -31,7 +30,7 @@ export const AttendanceTab = ({ employeeId }: AttendanceTabProps) => {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      // Simulate Kolkata time
+      // Simulate Indian Standard Time
       const now = new Date();
       now.setHours(now.getHours() + 5.5); // IST offset
       setCurrentTime(now);
@@ -91,7 +90,7 @@ export const AttendanceTab = ({ employeeId }: AttendanceTabProps) => {
       <div className="glass-card p-6 text-center floating-card">
         <div className="flex items-center justify-center space-x-2 mb-2">
           <Clock size={20} className="text-primary" />
-          <span className="text-sm text-muted-foreground">Kolkata Time</span>
+          <span className="text-sm text-muted-foreground">Indian Standard Time</span>
         </div>
         <div className="text-4xl font-bold gradient-text">
           {format(currentTime, 'HH:mm:ss')}
@@ -106,7 +105,7 @@ export const AttendanceTab = ({ employeeId }: AttendanceTabProps) => {
         <MapPin size={20} className="text-primary" />
         <div>
           <p className="font-medium">Nihaara Architecture Firm</p>
-          <p className="text-sm text-muted-foreground">Kolkata, West Bengal</p>
+          <p className="text-sm text-muted-foreground">Thodupuzha, Kerala, India</p>
         </div>
       </div>
 
