@@ -30,10 +30,11 @@ export const AttendanceTab = ({ employeeId }: AttendanceTabProps) => {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      // Simulate Indian Standard Time
+      // Get current UTC time and convert to IST (UTC+5:30)
       const now = new Date();
-      now.setHours(now.getHours() + 5.5); // IST offset
-      setCurrentTime(now);
+      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+      const istTime = new Date(utc + (5.5 * 3600000)); // IST is UTC+5:30
+      setCurrentTime(istTime);
     }, 1000);
 
     return () => clearInterval(timer);
