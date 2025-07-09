@@ -38,6 +38,7 @@
     @apply bg-background text-foreground font-['Poppins',sans-serif];
     background: linear-gradient(135deg, hsl(210, 15%, 8%) 0%, hsl(210, 15%, 12%) 100%);
     min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile */
     /* Mobile optimizations */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -48,6 +49,9 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    /* Mobile-first layout */
+    overflow-x: hidden;
+    touch-action: manipulation;
   }
 
   /* Safe area support for mobile */
@@ -62,6 +66,8 @@
 @layer components {
   .glass-card {
     @apply bg-card/80 backdrop-blur-xl border border-white/10 rounded-2xl;
+    /* Mobile touch optimization */
+    min-height: 44px; /* iOS minimum touch target */
   }
   
   .gradient-text {
@@ -108,11 +114,36 @@
   .mobile-tap {
     -webkit-tap-highlight-color: rgba(147, 51, 234, 0.2);
     cursor: pointer;
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Mobile container optimization */
+  .mobile-container {
+    @apply px-4 mx-auto max-w-sm;
+    width: 100vw;
+  }
+
+  /* Mobile safe area */
+  .mobile-safe-area {
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
   }
 
   /* Prevent zoom on input focus (iOS) */
   input, select, textarea {
     font-size: 16px !important;
+  }
+
+  /* Better mobile scrolling */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 }
 

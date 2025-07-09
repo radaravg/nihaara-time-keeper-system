@@ -80,23 +80,23 @@ export const AttendanceTab = ({ employeeId }: AttendanceTabProps) => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-4">
       {/* Header */}
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold gradient-text">Good Morning!</h1>
-        <p className="text-muted-foreground">Ready to start your productive day?</p>
+      <div className="text-center space-y-2 pt-4">
+        <h1 className="text-2xl font-bold gradient-text">Good Morning!</h1>
+        <p className="text-sm text-muted-foreground">Ready to start your productive day?</p>
       </div>
 
       {/* Current Time Card */}
-      <div className="glass-card p-6 text-center floating-card">
-        <div className="flex items-center justify-center space-x-2 mb-2">
-          <Clock size={20} className="text-primary" />
-          <span className="text-sm text-muted-foreground">Indian Standard Time</span>
+      <div className="glass-card p-4 text-center floating-card">
+        <div className="flex items-center justify-center space-x-2 mb-3">
+          <Clock size={16} className="text-primary" />
+          <span className="text-xs text-muted-foreground">Indian Standard Time</span>
         </div>
-        <div className="text-4xl font-bold gradient-text">
+        <div className="text-3xl font-bold gradient-text mb-2">
           {format(currentTime, 'HH:mm:ss')}
         </div>
-        <div className="text-lg text-muted-foreground mt-1">
+        <div className="text-sm text-muted-foreground">
           {format(currentTime, 'EEEE, MMMM do, yyyy')}
         </div>
       </div>
@@ -132,7 +132,7 @@ export const AttendanceTab = ({ employeeId }: AttendanceTabProps) => {
       )}
 
       {/* Swipe to Mark */}
-      <div className="glass-card p-6">
+      <div className="glass-card p-4">
         <SwipeToMark
           onSwipe={handleAttendanceAction}
           disabled={todayAttendance?.checkOut !== undefined}
@@ -141,13 +141,13 @@ export const AttendanceTab = ({ employeeId }: AttendanceTabProps) => {
         />
         
         {todayAttendance?.checkOut && (
-          <p className="text-center text-sm text-muted-foreground mt-4">
+          <p className="text-center text-xs text-muted-foreground mt-3">
             Attendance marked for today. See you tomorrow! 👋
           </p>
         )}
         
         {todayAttendance?.checkIn && !todayAttendance?.checkOut && !canCheckOut && (
-          <p className="text-center text-sm text-muted-foreground mt-4">
+          <p className="text-center text-xs text-muted-foreground mt-3">
             Check out available in {Math.ceil((10 * 60 * 1000 - (new Date().getTime() - new Date(todayAttendance.checkIn).getTime())) / 60000)} minutes
           </p>
         )}

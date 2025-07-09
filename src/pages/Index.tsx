@@ -57,9 +57,9 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-card to-background pb-20">
+    <div className="min-h-screen min-h-dvh bg-gradient-to-br from-background via-card to-background mobile-safe-area">
       {/* Main Content */}
-      <div className="animate-slide-in">
+      <div className="mobile-container mobile-scroll animate-slide-in pb-24">
         {activeTab === 'attendance' && <AttendanceTab employeeId={employee.id} />}
         {activeTab === 'calendar' && <CalendarTab employeeId={employee.id} />}
         {activeTab === 'task' && <TaskTab employeeId={employee.id} />}
