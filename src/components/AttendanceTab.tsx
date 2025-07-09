@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { HapticService } from '@/services/hapticService';
 
 interface AttendanceTabProps {
   employeeId: string;
@@ -56,6 +57,7 @@ export const AttendanceTab = ({ employeeId }: AttendanceTabProps) => {
     const now = new Date();
     
     if (pendingAction === 'checkin') {
+      HapticService.successFeedback();
       const newRecord: AttendanceRecord = {
         id: crypto.randomUUID(),
         employeeId,
@@ -67,6 +69,7 @@ export const AttendanceTab = ({ employeeId }: AttendanceTabProps) => {
       
       setAttendance(prev => [...prev, newRecord]);
     } else if (pendingAction === 'checkout' && todayAttendance) {
+      HapticService.successFeedback();
       setAttendance(prev => prev.map(record => 
         record.id === todayAttendance.id 
           ? { ...record, checkOut: now, workDescription: workDescription }

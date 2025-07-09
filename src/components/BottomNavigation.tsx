@@ -1,6 +1,7 @@
 
 import { Calendar, CheckCircle, FileText, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { HapticService } from '@/services/hapticService';
 
 interface BottomNavigationProps {
   activeTab: string;
@@ -25,9 +26,12 @@ export const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationPro
           return (
             <button
               key={tab.id}
-              onClick={() => onTabChange(tab.id)}
+              onClick={() => {
+                HapticService.toggleFeedback();
+                onTabChange(tab.id);
+              }}
               className={cn(
-                "flex flex-col items-center p-3 rounded-2xl transition-all duration-300",
+                "flex flex-col items-center p-3 rounded-2xl transition-all duration-300 mobile-tap",
                 isActive 
                   ? "bg-primary/20 text-primary scale-110" 
                   : "text-muted-foreground hover:text-foreground hover:bg-white/5"

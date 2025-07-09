@@ -119,6 +119,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-tap:active {
+    transform: scale(0.95);
+    background-color: rgba(147, 51, 234, 0.1);
   }
 
   /* Mobile container optimization */
@@ -144,6 +150,11 @@
   .mobile-scroll {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+  }
+
+  /* Enhanced button feedback */
+  button:active, .mobile-tap:active {
+    transform: scale(0.95);
   }
 }
 

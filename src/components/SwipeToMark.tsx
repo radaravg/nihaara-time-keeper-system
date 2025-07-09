@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { HapticService } from '@/services/hapticService';
 
 interface SwipeToMarkProps {
   onSwipe: () => void;
@@ -19,12 +20,14 @@ export const SwipeToMark = ({ onSwipe, disabled, isCheckedOut, onCheckOut }: Swi
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (disabled) return;
+    HapticService.light(); // Initial touch feedback
     setIsDragging(true);
     e.preventDefault();
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (disabled) return;
+    HapticService.light(); // Initial touch feedback
     setIsDragging(true);
     e.preventDefault();
   };
@@ -39,7 +42,13 @@ export const SwipeToMark = ({ onSwipe, disabled, isCheckedOut, onCheckOut }: Swi
       
       setDragPosition(newPosition);
       
+      // Gentle feedback during drag
+      if (Math.abs(newPosition - dragPosition) > 20) {
+        HapticService.light();
+      }
+      
       if (newPosition >= maxWidth * 0.8) {
+        HapticService.successFeedback(); // Success haptic + sound
         setIsCompleted(true);
         setIsDragging(false);
         setTimeout(() => {
@@ -64,7 +73,13 @@ export const SwipeToMark = ({ onSwipe, disabled, isCheckedOut, onCheckOut }: Swi
       
       setDragPosition(newPosition);
       
+      // Gentle feedback during drag
+      if (Math.abs(newPosition - dragPosition) > 20) {
+        HapticService.light();
+      }
+      
       if (newPosition >= maxWidth * 0.8) {
+        HapticService.successFeedback(); // Success haptic + sound
         setIsCompleted(true);
         setIsDragging(false);
         setTimeout(() => {
@@ -81,6 +96,7 @@ export const SwipeToMark = ({ onSwipe, disabled, isCheckedOut, onCheckOut }: Swi
 
     const handleEnd = () => {
       if (isDragging && !isCompleted) {
+        HapticService.light(); // Snap back feedback
         setDragPosition(0);
       }
       setIsDragging(false);
