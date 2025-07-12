@@ -1,4 +1,5 @@
 import { Preferences } from '@capacitor/preferences';
+import { supabase } from '@/integrations/supabase/client';
 
 const ADMIN_PASSWORD = '4004';
 const AUTH_KEY = 'nat_admin_session';

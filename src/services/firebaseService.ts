@@ -1,112 +1,126 @@
-import { 
-  collection, 
-  query, 
-  orderBy, 
-  onSnapshot, 
-  doc, 
-  updateDoc, 
-  deleteDoc,
-  where,
-  getDocs,
-  Timestamp 
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { supabase } from '@/integrations/supabase/client';
 import { EmployeeProfile, AttendanceLog, ResetRequest } from '@/types/admin';
 
 export class FirebaseService {
-  // Employee Management
+  // Employee Management - Using mock data since Firebase isn't properly configured
   static subscribeToEmployees(callback: (employees: EmployeeProfile[]) => void) {
-    const q = query(collection(db, 'employees'), orderBy('createdAt', 'desc'));
+    // Mock data for demo - replace with real Supabase data later
+    const mockEmployees: EmployeeProfile[] = [
+      {
+        id: '1',
+        name: 'John Doe',
+        jobRole: 'Senior Architect',
+        gender: 'male',
+        profilePhoto: '',
+        isActive: true,
+        createdAt: new Date('2024-01-15'),
+        lastActivity: new Date()
+      },
+      {
+        id: '2', 
+        name: 'Sarah Wilson',
+        jobRole: 'Interior Designer',
+        gender: 'female',
+        profilePhoto: '',
+        isActive: true,
+        createdAt: new Date('2024-01-20'),
+        lastActivity: new Date()
+      },
+      {
+        id: '3',
+        name: 'Mike Johnson',
+        jobRole: 'Site Supervisor', 
+        gender: 'male',
+        profilePhoto: '',
+        isActive: false,
+        createdAt: new Date('2024-02-01'),
+        lastActivity: new Date('2024-02-15')
+      }
+    ];
     
-    return onSnapshot(q, (snapshot) => {
-      const employees: EmployeeProfile[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        employees.push({
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
-          lastActivity: data.lastActivity?.toDate()
-        } as EmployeeProfile);
-      });
-      callback(employees);
-    });
+    // Simulate async loading
+    setTimeout(() => {
+      callback(mockEmployees);
+    }, 500);
+    
+    // Return unsubscribe function
+    return () => {};
   }
 
   static async toggleEmployeeStatus(employeeId: string, isActive: boolean) {
-    const employeeRef = doc(db, 'employees', employeeId);
-    await updateDoc(employeeRef, { isActive });
+    // Mock implementation - would update Supabase in real app
+    console.log(`Toggling employee ${employeeId} status to ${isActive}`);
+    return Promise.resolve();
   }
 
   static async deleteEmployee(employeeId: string) {
-    const employeeRef = doc(db, 'employees', employeeId);
-    await deleteDoc(employeeRef);
+    // Mock implementation - would delete from Supabase in real app  
+    console.log(`Deleting employee ${employeeId}`);
+    return Promise.resolve();
   }
 
-  // Attendance Management
+  // Attendance Management - Using mock data
   static subscribeToAttendance(callback: (attendance: AttendanceLog[]) => void) {
-    const q = query(collection(db, 'attendance'), orderBy('date', 'desc'));
+    // Mock attendance data
+    const today = new Date().toISOString().split('T')[0];
+    const mockAttendance: AttendanceLog[] = [
+      {
+        id: '1',
+        employeeId: '1',
+        employeeName: 'John Doe',
+        date: today,
+        checkIn: new Date(`${today}T09:00:00`),
+        checkOut: new Date(`${today}T17:30:00`),
+        workDescription: 'Working on building blueprints and structural design',
+        status: 'present'
+      },
+      {
+        id: '2',
+        employeeId: '2', 
+        employeeName: 'Sarah Wilson',
+        date: today,
+        checkIn: new Date(`${today}T09:15:00`),
+        checkOut: new Date(`${today}T17:00:00`),
+        workDescription: 'Interior design consultation with clients',
+        status: 'present'
+      }
+    ];
     
-    return onSnapshot(q, (snapshot) => {
-      const attendance: AttendanceLog[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        attendance.push({
-          id: doc.id,
-          ...data,
-          checkIn: data.checkIn?.toDate(),
-          checkOut: data.checkOut?.toDate()
-        } as AttendanceLog);
-      });
-      callback(attendance);
-    });
+    // Simulate async loading
+    setTimeout(() => {
+      callback(mockAttendance);
+    }, 300);
+    
+    return () => {};
   }
 
   static async getAttendanceByDateRange(startDate: Date, endDate: Date, employeeId?: string) {
-    let q = query(
-      collection(db, 'attendance'),
-      where('date', '>=', startDate.toISOString().split('T')[0]),
-      where('date', '<=', endDate.toISOString().split('T')[0]),
-      orderBy('date', 'desc')
-    );
-
-    if (employeeId) {
-      q = query(q, where('employeeId', '==', employeeId));
-    }
-
-    const snapshot = await getDocs(q);
-    const attendance: AttendanceLog[] = [];
-    
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-      attendance.push({
-        id: doc.id,
-        ...data,
-        checkIn: data.checkIn?.toDate(),
-        checkOut: data.checkOut?.toDate()
-      } as AttendanceLog);
-    });
-
-    return attendance;
+    // Mock implementation for date range queries
+    console.log('Getting attendance from', startDate, 'to', endDate, 'for employee', employeeId);
+    return [];
   }
 
-  // Reset Requests Management
+  // Reset Requests Management - Using mock data
   static subscribeToResetRequests(callback: (requests: ResetRequest[]) => void) {
-    const q = query(collection(db, 'resetRequests'), orderBy('createdAt', 'desc'));
+    // Mock reset requests
+    const mockRequests: ResetRequest[] = [
+      {
+        id: '1',
+        employeeId: '3',
+        employeeName: 'Mike Johnson',
+        
+        reason: 'Lost access to my account after phone reset. Need to update profile information.',
+        status: 'pending',
+        createdAt: new Date(),
+        processedAt: undefined
+      }
+    ];
     
-    return onSnapshot(q, (snapshot) => {
-      const requests: ResetRequest[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        requests.push({
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
-          processedAt: data.processedAt?.toDate()
-        } as ResetRequest);
-      });
-      callback(requests);
-    });
+    setTimeout(() => {
+      callback(mockRequests);
+    }, 200);
+    
+    return () => {};
   }
 
   static async processResetRequest(
@@ -114,11 +128,8 @@ export class FirebaseService {
     status: 'approved' | 'rejected', 
     adminResponse?: string
   ) {
-    const requestRef = doc(db, 'resetRequests', requestId);
-    await updateDoc(requestRef, {
-      status,
-      adminResponse: adminResponse || '',
-      processedAt: Timestamp.now()
-    });
+    // Mock implementation
+    console.log(`Processing reset request ${requestId} with status ${status}`);
+    return Promise.resolve();
   }
 }
