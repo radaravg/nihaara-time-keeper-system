@@ -10,7 +10,11 @@ import { useToast } from '@/hooks/use-toast';
 
 type AdminTab = 'employees' | 'attendance' | 'requests' | 'notes' | 'exports';
 
-export const AdminDashboard = () => {
+interface AdminDashboardProps {
+  onLogout?: () => void;
+}
+
+export const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
   const [activeTab, setActiveTab] = useState<AdminTab>('employees');
   const { toast } = useToast();
 
@@ -20,7 +24,12 @@ export const AdminDashboard = () => {
       title: "Logged out",
       description: "You have been logged out of the admin dashboard"
     });
-    window.location.reload();
+    
+    if (onLogout) {
+      onLogout();
+    } else {
+      window.location.reload();
+    }
   };
 
   return (
