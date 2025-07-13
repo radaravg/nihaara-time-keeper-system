@@ -1,13 +1,13 @@
 
 import { useState, useEffect } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { Employee } from '@/types';
-import { OnboardingFlow } from '@/components/OnboardingFlow';
-import { BottomNavigation } from '@/components/BottomNavigation';
-import { AttendanceTab } from '@/components/AttendanceTab';
-import { CalendarTab } from '@/components/CalendarTab';
-import { TaskTab } from '@/components/TaskTab';
-import { ProfileTab } from '@/components/ProfileTab';
+import { Employee } from '@/types/employee';
+import { OnboardingForm } from '@/components/employee/OnboardingForm';
+import { BottomTabs } from '@/components/employee/BottomTabs';
+import { SwipeAttendance } from '@/components/employee/SwipeAttendance';
+import { EmployeeCalendar } from '@/components/employee/EmployeeCalendar';
+import { TasksTab } from '@/components/employee/TasksTab';
+import { EmployeeProfile } from '@/components/employee/EmployeeProfile';
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { AdminAuthService } from '@/services/adminAuth';
@@ -15,25 +15,22 @@ import { Button } from '@/components/ui/button';
 import { Shield } from 'lucide-react';
 
 const Index = () => {
-  const [employee, setEmployee] = useLocalStorage<Employee | null>('employee', null);
+  const [employee, setEmployee] = useLocalStorage<Employee | null>('nat_employee', null);
   const [activeTab, setActiveTab] = useState('attendance');
   const [isLoading, setIsLoading] = useState(true);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
-  const [checkingAdminAuth, setCheckingAdminAuth] = useState(true);
 
   useEffect(() => {
-    // Check admin authentication status and simulate loading
     const checkAuth = async () => {
       const authenticated = await AdminAuthService.isAuthenticated();
       setIsAdminAuthenticated(authenticated);
-      setCheckingAdminAuth(false);
     };
 
     const timer = setTimeout(() => {
       setIsLoading(false);
       checkAuth();
-    }, 1500);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -42,8 +39,9 @@ const Index = () => {
     setEmployee(newEmployee);
   };
 
-  const handleUpdateEmployee = (updatedEmployee: Employee) => {
-    setEmployee(updatedEmployee);
+  const handleLogout = () => {
+    setEmployee(null);
+    setActiveTab('attendance');
   };
 
   const handleAdminLogin = () => {
@@ -58,7 +56,7 @@ const Index = () => {
 
   const handleShowAdminLogin = () => {
     if (navigator.vibrate) {
-      navigator.vibrate(30);
+      navigator.vibrate(50);
     }
     setShowAdminLogin(true);
   };
@@ -111,7 +109,7 @@ const Index = () => {
           </Button>
         </div>
         
-        <OnboardingFlow onComplete={handleOnboardingComplete} />
+        <OnboardingForm onComplete={handleOnboardingComplete} />
       </div>
     );
   }
@@ -133,20 +131,16 @@ const Index = () => {
       </div>
 
       {/* Main Content */}
-      <div className="mobile-container mobile-scroll animate-slide-in pb-24">
-        {activeTab === 'attendance' && <AttendanceTab employeeId={employee.id} />}
-        {activeTab === 'calendar' && <CalendarTab employeeId={employee.id} />}
-        {activeTab === 'task' && <TaskTab employeeId={employee.id} />}
-        {activeTab === 'profile' && (
-          <ProfileTab 
-            employee={employee} 
-            onUpdateEmployee={handleUpdateEmployee}
-          />
-        )}
+      <div className="mobile-container mobile-scroll animate-slide-in pb-24 pt-4">
+        {activeTab === 'attendance' && <SwipeAttendance employee={employee} />}
+        {activeTab === 'calendar' && <EmployeeCalendar employee={employee} />}
+        {activeTab === 'tasks' && <TasksTab employeeId={employee.id} />}
+        {activeTab === 'profile' && <EmployeeProfile employee={employee} onLogout={handleLogout} />}
+        {activeTab === 'salary' && <EmployeeProfile employee={employee} onLogout={handleLogout} />}
       </div>
 
       {/* Bottom Navigation */}
-      <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <BottomTabs activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );
 };

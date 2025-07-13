@@ -14,6 +14,86 @@ export type Database = {
   }
   public: {
     Tables: {
+      attendance: {
+        Row: {
+          check_in: string | null
+          check_out: string | null
+          completion_notes: string | null
+          created_at: string
+          date: string
+          employee_id: string
+          id: string
+          status: string
+          updated_at: string
+          work_description: string | null
+        }
+        Insert: {
+          check_in?: string | null
+          check_out?: string | null
+          completion_notes?: string | null
+          created_at?: string
+          date: string
+          employee_id: string
+          id?: string
+          status?: string
+          updated_at?: string
+          work_description?: string | null
+        }
+        Update: {
+          check_in?: string | null
+          check_out?: string | null
+          completion_notes?: string | null
+          created_at?: string
+          date?: string
+          employee_id?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          work_description?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employees: {
+        Row: {
+          created_at: string
+          gender: string
+          id: string
+          name: string
+          profile_picture_url: string | null
+          role: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          gender: string
+          id?: string
+          name: string
+          profile_picture_url?: string | null
+          role: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          gender?: string
+          id?: string
+          name?: string
+          profile_picture_url?: string | null
+          role?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           first_name: string | null
