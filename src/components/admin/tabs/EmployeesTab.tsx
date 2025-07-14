@@ -5,17 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { FirebaseService } from '@/services/firebaseService';
-import { EmployeeProfile } from '@/types/admin';
+import { SupabaseService, Employee } from '@/services/supabaseService';
 import { useToast } from '@/hooks/use-toast';
 
 export const EmployeesTab = () => {
-  const [employees, setEmployees] = useState<EmployeeProfile[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = FirebaseService.subscribeToEmployees((employeeData) => {
+    const unsubscribe = SupabaseService.subscribeToEmployees((employeeData) => {
       setEmployees(employeeData);
       setLoading(false);
     });
@@ -23,12 +22,13 @@ export const EmployeesTab = () => {
     return () => unsubscribe();
   }, []);
 
-  const handleToggleStatus = async (employeeId: string, currentStatus: boolean) => {
+  const handleToggleStatus = async (employeeId: string, currentStatus: string) => {
     try {
-      await FirebaseService.toggleEmployeeStatus(employeeId, !currentStatus);
+      const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+      await SupabaseService.toggleEmployeeStatus(employeeId, newStatus);
       toast({
         title: "Employee Status Updated",
-        description: `Employee ${!currentStatus ? 'activated' : 'deactivated'} successfully`
+        description: `Employee ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully`
       });
     } catch (error) {
       toast({
@@ -42,7 +42,7 @@ export const EmployeesTab = () => {
   const handleDeleteEmployee = async (employeeId: string, employeeName: string) => {
     if (window.confirm(`Are you sure you want to delete ${employeeName}? This action cannot be undone.`)) {
       try {
-        await FirebaseService.deleteEmployee(employeeId);
+        await SupabaseService.deleteEmployee(employeeId);
         toast({
           title: "Employee Deleted",
           description: `${employeeName} has been removed from the system`
@@ -77,7 +77,7 @@ export const EmployeesTab = () => {
           Employee Management
         </h1>
         <p className="text-muted-foreground">
-          {employees.length} total employees • {employees.filter(e => e.isActive).length} active
+          {employees.length} total employees • {employees.filter(e => e.status === 'active').length} active
         </p>
       </div>
 
@@ -95,7 +95,7 @@ export const EmployeesTab = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <Avatar className="w-12 h-12">
-                    <AvatarImage src={employee.profilePhoto} />
+                    <AvatarImage src={employee.profile_picture_url || ''} />
                     <AvatarFallback className="bg-gradient-to-br from-primary to-blue-500 text-white">
                       {employee.name.charAt(0).toUpperCase()}
                     </AvatarFallback>
@@ -103,13 +103,13 @@ export const EmployeesTab = () => {
                   
                   <div className="flex-1">
                     <h3 className="font-semibold text-foreground">{employee.name}</h3>
-                    <p className="text-sm text-muted-foreground">{employee.jobRole}</p>
+                    <p className="text-sm text-muted-foreground">{employee.role}</p>
                     <div className="flex items-center space-x-2 mt-1">
-                      <Badge variant={employee.isActive ? "default" : "secondary"}>
-                        {employee.isActive ? "Active" : "Inactive"}
+                      <Badge variant={employee.status === 'active' ? "default" : "secondary"}>
+                        {employee.status === 'active' ? "Active" : "Inactive"}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
-                        {employee.gender} • Joined {new Date(employee.createdAt).toLocaleDateString()}
+                        {employee.gender} • Joined {new Date(employee.created_at).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
@@ -123,10 +123,10 @@ export const EmployeesTab = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-background border-white/10">
                     <DropdownMenuItem
-                      onClick={() => handleToggleStatus(employee.id, employee.isActive)}
+                      onClick={() => handleToggleStatus(employee.id, employee.status)}
                       className="flex items-center space-x-2"
                     >
-                      {employee.isActive ? (
+                      {employee.status === 'active' ? (
                         <>
                           <UserX size={16} />
                           <span>Deactivate</span>
