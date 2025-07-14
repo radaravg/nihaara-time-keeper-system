@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { HapticService } from '@/services/hapticService';
+import { useToast } from '@/hooks/use-toast';
 
 interface AttendanceTabProps {
   employeeId: string;
@@ -19,6 +20,7 @@ export const AttendanceTab = ({ employeeId }: AttendanceTabProps) => {
   const [showWorkDialog, setShowWorkDialog] = useState(false);
   const [workDescription, setWorkDescription] = useState('');
   const [pendingAction, setPendingAction] = useState<'checkin' | 'checkout' | null>(null);
+  const { toast } = useToast();
 
   const today = format(new Date(), 'yyyy-MM-dd');
   const todayAttendance = attendance.find(record => 
@@ -40,6 +42,28 @@ export const AttendanceTab = ({ employeeId }: AttendanceTabProps) => {
 
     return () => clearInterval(timer);
   }, []);
+
+  // Check-out reminder notifications
+  useEffect(() => {
+    if (!todayAttendance?.checkIn || todayAttendance?.checkOut) return;
+
+    const checkInTime = new Date(todayAttendance.checkIn).getTime();
+    const now = new Date().getTime();
+    const hoursWorked = (now - checkInTime) / (1000 * 60 * 60);
+
+    // Show notification after 8 hours of work
+    if (hoursWorked >= 8) {
+      const reminderInterval = setInterval(() => {
+        toast({
+          title: "Time to check out! 🕒",
+          description: "You've been working for over 8 hours. Don't forget to check out.",
+          duration: 5000,
+        });
+      }, 30 * 60 * 1000); // Show every 30 minutes
+
+      return () => clearInterval(reminderInterval);
+    }
+  }, [todayAttendance, toast]);
 
   const handleAttendanceAction = () => {
     if (todayAttendance?.checkIn && !todayAttendance?.checkOut) {
