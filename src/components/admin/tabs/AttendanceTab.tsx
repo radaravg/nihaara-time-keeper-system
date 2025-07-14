@@ -5,32 +5,27 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { SupabaseService } from '@/services/supabaseService';
-import { AttendanceWithEmployee } from '@/types/employee';
+import { FirebaseService } from '@/services/firebaseService';
+import { AttendanceLog } from '@/types/admin';
 import { format } from 'date-fns';
 
 export const AttendanceTab = () => {
-  const [attendance, setAttendance] = useState<AttendanceWithEmployee[]>([]);
+  const [attendance, setAttendance] = useState<AttendanceLog[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadAttendance();
-  }, [selectedDate]);
-
-  const loadAttendance = async () => {
-    try {
-      const dateString = format(selectedDate, 'yyyy-MM-dd');
-      const data = await SupabaseService.getAttendanceByDate(dateString);
-      setAttendance(data);
-    } catch (error) {
-      console.error('Failed to load attendance:', error);
-    } finally {
+    const unsubscribe = FirebaseService.subscribeToAttendance((attendanceData) => {
+      setAttendance(attendanceData);
       setLoading(false);
-    }
-  };
+    });
 
-  const todayAttendance = attendance;
+    return () => unsubscribe();
+  }, []);
+
+  const todayAttendance = attendance.filter(
+    record => record.date === format(selectedDate, 'yyyy-MM-dd')
+  );
 
   if (loading) {
     return (
@@ -112,18 +107,18 @@ export const AttendanceTab = () => {
             <Card key={record.id} className="p-4 glass-card">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-semibold">{record.employee.name}</h4>
+                  <h4 className="font-semibold">{record.employeeName}</h4>
                   <div className="flex items-center space-x-4 mt-1 text-sm text-muted-foreground">
-                    {record.check_in && (
-                      <span>In: {format(new Date(record.check_in), 'HH:mm')}</span>
+                    {record.checkIn && (
+                      <span>In: {format(record.checkIn, 'HH:mm')}</span>
                     )}
-                    {record.check_out && (
-                      <span>Out: {format(new Date(record.check_out), 'HH:mm')}</span>
+                    {record.checkOut && (
+                      <span>Out: {format(record.checkOut, 'HH:mm')}</span>
                     )}
                   </div>
-                  {record.work_description && (
+                  {record.workDescription && (
                     <p className="text-sm text-muted-foreground mt-1">
-                      {record.work_description}
+                      {record.workDescription}
                     </p>
                   )}
                 </div>

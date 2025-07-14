@@ -5,43 +5,30 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { SupabaseService } from '@/services/supabaseService';
-import { Employee } from '@/types/employee';
+import { FirebaseService } from '@/services/firebaseService';
+import { EmployeeProfile } from '@/types/admin';
 import { useToast } from '@/hooks/use-toast';
 
 export const EmployeesTab = () => {
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [employees, setEmployees] = useState<EmployeeProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    loadEmployees();
+    const unsubscribe = FirebaseService.subscribeToEmployees((employeeData) => {
+      setEmployees(employeeData);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const loadEmployees = async () => {
+  const handleToggleStatus = async (employeeId: string, currentStatus: boolean) => {
     try {
-      const data = await SupabaseService.getAllEmployees();
-      setEmployees(data);
-    } catch (error) {
-      console.error('Failed to load employees:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load employees",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleToggleStatus = async (employeeId: string, currentStatus: string) => {
-    try {
-      const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-      await SupabaseService.updateEmployee(employeeId, { status: newStatus });
-      await loadEmployees(); // Refresh the list
+      await FirebaseService.toggleEmployeeStatus(employeeId, !currentStatus);
       toast({
         title: "Employee Status Updated",
-        description: `Employee ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully`
+        description: `Employee ${!currentStatus ? 'activated' : 'deactivated'} successfully`
       });
     } catch (error) {
       toast({
@@ -52,19 +39,18 @@ export const EmployeesTab = () => {
     }
   };
 
-  const handleResetProfile = async (employeeId: string, employeeName: string) => {
-    if (window.confirm(`Reset profile for ${employeeName}? This will deactivate their account.`)) {
+  const handleDeleteEmployee = async (employeeId: string, employeeName: string) => {
+    if (window.confirm(`Are you sure you want to delete ${employeeName}? This action cannot be undone.`)) {
       try {
-        await SupabaseService.updateEmployee(employeeId, { status: 'inactive' });
-        await loadEmployees();
+        await FirebaseService.deleteEmployee(employeeId);
         toast({
-          title: "Profile Reset",
-          description: `${employeeName}'s profile has been reset`
+          title: "Employee Deleted",
+          description: `${employeeName} has been removed from the system`
         });
       } catch (error) {
         toast({
           title: "Error",
-          description: "Failed to reset profile",
+          description: "Failed to delete employee",
           variant: "destructive"
         });
       }
@@ -91,7 +77,7 @@ export const EmployeesTab = () => {
           Employee Management
         </h1>
         <p className="text-muted-foreground">
-          {employees.length} total employees • {employees.filter(e => e.status === 'active').length} active
+          {employees.length} total employees • {employees.filter(e => e.isActive).length} active
         </p>
       </div>
 
@@ -109,7 +95,7 @@ export const EmployeesTab = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <Avatar className="w-12 h-12">
-                    <AvatarImage src={employee.profile_picture_url} />
+                    <AvatarImage src={employee.profilePhoto} />
                     <AvatarFallback className="bg-gradient-to-br from-primary to-blue-500 text-white">
                       {employee.name.charAt(0).toUpperCase()}
                     </AvatarFallback>
@@ -117,13 +103,13 @@ export const EmployeesTab = () => {
                   
                   <div className="flex-1">
                     <h3 className="font-semibold text-foreground">{employee.name}</h3>
-                    <p className="text-sm text-muted-foreground">{employee.role}</p>
+                    <p className="text-sm text-muted-foreground">{employee.jobRole}</p>
                     <div className="flex items-center space-x-2 mt-1">
-                      <Badge variant={employee.status === 'active' ? "default" : "secondary"}>
-                        {employee.status === 'active' ? "Active" : "Inactive"}
+                      <Badge variant={employee.isActive ? "default" : "secondary"}>
+                        {employee.isActive ? "Active" : "Inactive"}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
-                        {employee.gender} • Joined {new Date(employee.created_at).toLocaleDateString()}
+                        {employee.gender} • Joined {new Date(employee.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
@@ -137,10 +123,10 @@ export const EmployeesTab = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-background border-white/10">
                     <DropdownMenuItem
-                      onClick={() => handleToggleStatus(employee.id, employee.status)}
+                      onClick={() => handleToggleStatus(employee.id, employee.isActive)}
                       className="flex items-center space-x-2"
                     >
-                      {employee.status === 'active' ? (
+                      {employee.isActive ? (
                         <>
                           <UserX size={16} />
                           <span>Deactivate</span>
@@ -153,11 +139,11 @@ export const EmployeesTab = () => {
                       )}
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => handleResetProfile(employee.id, employee.name)}
+                      onClick={() => handleDeleteEmployee(employee.id, employee.name)}
                       className="flex items-center space-x-2 text-destructive"
                     >
                       <Trash2 size={16} />
-                      <span>Reset Profile</span>
+                      <span>Delete</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
