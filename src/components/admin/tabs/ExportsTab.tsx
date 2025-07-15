@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { FirebaseService } from '@/services/firebaseService';
+import { SupabaseService } from '@/services/supabaseService';
 import { useToast } from '@/hooks/use-toast';
 import { format, subDays, subWeeks, subMonths } from 'date-fns';
 import jsPDF from 'jspdf';
@@ -121,7 +121,9 @@ export const ExportsTab = () => {
     
     try {
       const { start, end } = getDateRange();
-      const attendanceData = await FirebaseService.getAttendanceByDateRange(start, end);
+      const startDateStr = format(start, 'yyyy-MM-dd');
+      const endDateStr = format(end, 'yyyy-MM-dd');
+      const attendanceData = await SupabaseService.getAttendanceByDateRange(startDateStr, endDateStr);
       
       if (attendanceData.length === 0) {
         toast({
@@ -132,10 +134,20 @@ export const ExportsTab = () => {
         return;
       }
       
+      // Transform data for export
+      const transformedData = attendanceData.map(record => ({
+        employeeName: record.employees?.name || 'Unknown',
+        date: record.date,
+        checkIn: record.check_in ? new Date(record.check_in) : null,
+        checkOut: record.check_out ? new Date(record.check_out) : null,
+        status: record.status,
+        workDescription: record.work_description
+      }));
+      
       if (exportType === 'pdf') {
-        await exportToPDF(attendanceData);
+        await exportToPDF(transformedData);
       } else {
-        await exportToExcel(attendanceData);
+        await exportToExcel(transformedData);
       }
       
       toast({

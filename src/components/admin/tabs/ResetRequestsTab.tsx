@@ -4,25 +4,21 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { FirebaseService } from '@/services/firebaseService';
-import { ResetRequest } from '@/types/admin';
+import { SupabaseService } from '@/services/supabaseService';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
 export const ResetRequestsTab = () => {
-  const [requests, setRequests] = useState<ResetRequest[]>([]);
+  const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [responses, setResponses] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = FirebaseService.subscribeToResetRequests((requestData) => {
-      setRequests(requestData);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    // For now, show empty state since reset requests aren't implemented in Supabase yet
+    setRequests([]);
+    setLoading(false);
   }, []);
 
   const handleProcessRequest = async (
@@ -32,19 +28,11 @@ export const ResetRequestsTab = () => {
     setProcessingId(requestId);
     
     try {
-      const adminResponse = responses[requestId] || '';
-      await FirebaseService.processResetRequest(requestId, status, adminResponse);
-      
+      // TODO: Implement reset request processing in Supabase
       toast({
-        title: `Request ${status}`,
-        description: `Reset request has been ${status} successfully`
-      });
-      
-      // Clear the response text
-      setResponses(prev => {
-        const newResponses = { ...prev };
-        delete newResponses[requestId];
-        return newResponses;
+        title: "Feature Coming Soon",
+        description: "Reset request processing will be implemented soon",
+        variant: "destructive"
       });
     } catch (error) {
       toast({
